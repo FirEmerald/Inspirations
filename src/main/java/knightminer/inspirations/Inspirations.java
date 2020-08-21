@@ -9,6 +9,7 @@ import knightminer.inspirations.common.datagen.InspirationsItemTagsProvider;
 import knightminer.inspirations.common.datagen.InspirationsLootTableProvider;
 import knightminer.inspirations.common.network.InspirationsNetwork;
 import knightminer.inspirations.library.InspirationsRegistry;
+import knightminer.inspirations.recipes.InspirationsRecipes;
 import knightminer.inspirations.shared.InspirationsShared;
 import knightminer.inspirations.tools.InspirationsTools;
 import knightminer.inspirations.tweaks.InspirationsTweaks;
@@ -80,7 +81,7 @@ public class Inspirations {
     modBus.register(new InspirationsUtility());
     modBus.register(new InspirationsTools());
     modBus.register(new InspirationsTweaks());
-    //		pulseManager.registerPulse(new InspirationsRecipes());
+    modBus.register(new InspirationsRecipes());
 
     InspirationsNetwork.INSTANCE.setup();
   }
