@@ -10,15 +10,24 @@ import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.function.IntUnaryOperator;
 
+import static knightminer.inspirations.library.recipe.cauldron.recipe.ICauldronRecipe.MAX;
+
 /**
  * Logic to update the level to a new value
  */
-public interface ILevelUpdate extends IntUnaryOperator {
-  String KEY_ADD = "add";
-  String KEY_SET = "set";
+public abstract class LevelUpdate implements IntUnaryOperator {
+  private static final String KEY_ADD = "add";
+  private static final String KEY_SET = "set";
+  /** Cache of add operations, ranges from -MAX to MAX */
+  private static final LevelUpdate[] ADD_CACHE = new LevelUpdate[MAX + MAX + 1];
+  /** Cache of set operations */
+  private static final LevelUpdate[] SET_CACHE = new LevelUpdate[MAX + 1];
+
+  /** No constructor to prevent extension, it will not work with the read methods */
+  private LevelUpdate() {}
 
   /** Level update that returns the input */
-  ILevelUpdate IDENTITY = new ILevelUpdate() {
+  public static final LevelUpdate IDENTITY = new LevelUpdate() {
     @Override
     public void write(PacketBuffer buffer) {
       buffer.writeEnumValue(Type.IDENTITY);
@@ -34,26 +43,41 @@ public interface ILevelUpdate extends IntUnaryOperator {
       return new JsonObject();
     }
   };
+  static {
+    // -3 (offset) + 3 = 0
+    ADD_CACHE[MAX] = IDENTITY;
+  }
 
   /**
-   * Writes this to the packet buffer
-   * @param buffer  Buffer instance
+   * Creates a new level update to add the specified amount
+   * @param amount  Amount to add
+   * @return  Level update
    */
-  void write(PacketBuffer buffer);
+  public static LevelUpdate add(int amount) {
+    if (amount < -MAX || amount > MAX) {
+      throw new IllegalArgumentException("Invalid amount " + amount + ", must be between -3 and 3");
+    }
+    // negatives are not array indexes
+    int key = amount + MAX;
+    if (ADD_CACHE[key] == null) {
+      ADD_CACHE[key] = new Add(amount);
+    }
+    return ADD_CACHE[key];
+  }
 
   /**
-   * Writes this to the packet buffer
-   * @param json  Json object
+   * Creates a new level update to set the specified amount
+   * @param amount  Amount to set
+   * @return  Level update
    */
-  default void write(JsonObject json) {}
-
-  /**
-   * Writes this to JSON
-   */
-  default JsonObject toJson() {
-    JsonObject object = new JsonObject();
-    write(object);
-    return object;
+  public static LevelUpdate set(int amount) {
+    if (amount < 0 || amount > MAX) {
+      throw new IllegalArgumentException("Invalid amount " + amount + ", must be between 0 and 3");
+    }
+    if (SET_CACHE[amount] == null) {
+      SET_CACHE[amount] = new Set(amount);
+    }
+    return SET_CACHE[amount];
   }
 
   /**
@@ -61,7 +85,7 @@ public interface ILevelUpdate extends IntUnaryOperator {
    * @param json  JSON object
    * @return  Level predicate
    */
-  static ILevelUpdate read(JsonObject json) {
+  public static LevelUpdate read(JsonObject json) {
     if (json.has(KEY_ADD)) {
       return new Add(JSONUtils.getInt(json, KEY_ADD));
     }
@@ -78,7 +102,7 @@ public interface ILevelUpdate extends IntUnaryOperator {
    * @param buffer  Buffer instance
    * @return  Level predicate
    */
-  static ILevelUpdate read(PacketBuffer buffer) {
+  public static LevelUpdate read(PacketBuffer buffer) {
     Type type = buffer.readEnumValue(Type.class);
     switch (type) {
       case IDENTITY: return IDENTITY;
@@ -89,11 +113,32 @@ public interface ILevelUpdate extends IntUnaryOperator {
   }
 
   /**
+   * Writes this to the packet buffer
+   * @param buffer  Buffer instance
+   */
+  public abstract void write(PacketBuffer buffer);
+
+  /**
+   * Writes this to the packet buffer
+   * @param json  Json object
+   */
+  protected void write(JsonObject json) {}
+
+  /**
+   * Writes this to JSON
+   */
+  public JsonObject toJson() {
+    JsonObject object = new JsonObject();
+    write(object);
+    return object;
+  }
+
+  /**
    * Updater that sets the amount
    */
-  class Set implements ILevelUpdate {
+  private static class Set extends LevelUpdate {
     private final int amount;
-    public Set(int amount) {
+    private Set(int amount) {
       this.amount = amount;
     }
 
@@ -109,7 +154,7 @@ public interface ILevelUpdate extends IntUnaryOperator {
     }
 
     @Override
-    public void write(JsonObject json) {
+    protected void write(JsonObject json) {
       json.addProperty(KEY_SET, amount);
     }
   }
@@ -117,9 +162,9 @@ public interface ILevelUpdate extends IntUnaryOperator {
   /**
    * Updater that adds to the amount
    */
-  class Add implements ILevelUpdate {
+  private static class Add extends LevelUpdate {
     private final int amount;
-    public Add(int amount) {
+    private Add(int amount) {
       this.amount = amount;
     }
 
@@ -135,13 +180,13 @@ public interface ILevelUpdate extends IntUnaryOperator {
     }
 
     @Override
-    public void write(JsonObject json) {
+    protected void write(JsonObject json) {
       json.addProperty(KEY_ADD, amount);
     }
   }
 
   /** All valid level update types */
-  enum Type {
+  private enum Type {
     IDENTITY,
     SET,
     ADD;

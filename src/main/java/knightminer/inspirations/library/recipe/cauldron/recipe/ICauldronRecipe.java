@@ -10,6 +10,9 @@ import slimeknights.mantle.recipe.ICommonRecipe;
  * Base interface for all cauldron recipes
  */
 public interface ICauldronRecipe extends ICommonRecipe<ICauldronInventory> {
+  /** Maximum fill level of the cauldron */
+  static int MAX = 3;
+
   /**
    * Updates the cauldron based on the results of the recipe
    * @param inventory  Inventory for modification

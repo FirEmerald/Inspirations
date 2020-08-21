@@ -8,8 +8,8 @@ import knightminer.inspirations.library.recipe.cauldron.contents.ICauldronConten
 import knightminer.inspirations.library.recipe.cauldron.contents.ICauldronFluid;
 import knightminer.inspirations.library.recipe.cauldron.contents.ICauldronPotion;
 import knightminer.inspirations.library.recipe.cauldron.ingredient.ICauldronIngredient;
-import knightminer.inspirations.library.recipe.cauldron.util.ILevelPredicate;
-import knightminer.inspirations.library.recipe.cauldron.util.ILevelUpdate;
+import knightminer.inspirations.library.recipe.cauldron.util.LevelPredicate;
+import knightminer.inspirations.library.recipe.cauldron.util.LevelUpdate;
 import knightminer.inspirations.library.recipe.cauldron.util.TemperaturePredicate;
 import knightminer.inspirations.recipes.InspirationsRecipes;
 import net.minecraft.advancements.Advancement;
@@ -29,15 +29,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Builder for a standard cauldron recipe
+ */
 public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeBuilder> {
   private final Ingredient input;
   private final int amount;
   private final ICauldronIngredient contents;
-  private ILevelPredicate levels;
+  private LevelPredicate levels;
   private TemperaturePredicate temperature = TemperaturePredicate.ANY;
   private ItemStack output = ItemStack.EMPTY;
   private ICauldronContents newContents = EmptyCauldronContents.INSTANCE;
-  private ILevelUpdate levelUpdate = ILevelUpdate.IDENTITY;
+  private LevelUpdate levelUpdate = LevelUpdate.IDENTITY;
   @Nullable
   private ItemStack container = null;
 
@@ -86,7 +89,7 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
    * @return  Builder instance
    */
   public CauldronRecipeBuilder minLevels(int min) {
-    this.levels = new ILevelPredicate.Min(min);
+    this.levels = LevelPredicate.min(min);
     return this;
   }
 
@@ -96,8 +99,24 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
    * @return  Builder instance
    */
   public CauldronRecipeBuilder maxLevels(int max) {
-    this.levels = new ILevelPredicate.Max(max);
+    this.levels = LevelPredicate.max(max);
     return this;
+  }
+
+  /**
+   * Sets the required number of levels to be a empty cauldron
+   * @return  Builder instance
+   */
+  public CauldronRecipeBuilder matchEmpty() {
+    return maxLevels(0);
+  }
+
+  /**
+   * Sets the required number of levels to be a full cauldron
+   * @return  Builder instance
+   */
+  public CauldronRecipeBuilder matchFull() {
+    return minLevels(ICauldronRecipe.MAX);
   }
 
   /**
@@ -107,7 +126,7 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
    * @return  Builder instance
    */
   public CauldronRecipeBuilder levelRange(int min, int max) {
-    this.levels = new ILevelPredicate.Range(min, max);
+    this.levels = LevelPredicate.range(min, max);
     return this;
   }
 
@@ -186,8 +205,24 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
    * @return  Builder instance
    */
   public CauldronRecipeBuilder setLevels(int levels) {
-    this.levelUpdate = new ILevelUpdate.Set(levels);
+    this.levelUpdate = LevelUpdate.set(levels);
     return this;
+  }
+
+  /**
+   * Sets the cauldron to full
+   * @return  Builder instance
+   */
+  public CauldronRecipeBuilder setFull() {
+    return setLevels(ICauldronRecipe.MAX);
+  }
+
+  /**
+   * Sets the cauldron to empty
+   * @return  Builder instance
+   */
+  public CauldronRecipeBuilder setEmpty() {
+    return setLevels(0);
   }
 
   /**
@@ -196,7 +231,7 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
    * @return  Builder instance
    */
   public CauldronRecipeBuilder addLevels(int levels) {
-    this.levelUpdate = new ILevelUpdate.Add(levels);
+    this.levelUpdate = LevelUpdate.add(levels);
     return this;
   }
 
@@ -241,17 +276,17 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
     private final Ingredient input;
     private final int amount;
     private final ICauldronIngredient contents;
-    private final ILevelPredicate level;
+    private final LevelPredicate level;
     private final TemperaturePredicate temperature;
     private final ItemStack output;
     private final ICauldronContents newContents;
-    private final ILevelUpdate levelUpdate;
+    private final LevelUpdate levelUpdate;
     @Nullable
     private final ItemStack container;
     private final Advancement.Builder advancementBuilder;
     private final ResourceLocation advancementId;
 
-    private Result(ResourceLocation id, String group, Ingredient input, int amount, ICauldronIngredient contents, ILevelPredicate level, TemperaturePredicate temperature, ItemStack output, ICauldronContents newContents, ILevelUpdate levelUpdate, @Nullable ItemStack container, Builder advancementBuilder, ResourceLocation advancementId) {
+    private Result(ResourceLocation id, String group, Ingredient input, int amount, ICauldronIngredient contents, LevelPredicate level, TemperaturePredicate temperature, ItemStack output, ICauldronContents newContents, LevelUpdate levelUpdate, @Nullable ItemStack container, Builder advancementBuilder, ResourceLocation advancementId) {
       this.id = id;
       this.group = group;
       this.input = input;
@@ -319,7 +354,7 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
       if (newContents != EmptyCauldronContents.INSTANCE) {
         outputJson.add("contents", CauldronContentTypes.toJson(newContents));
       }
-      if (levelUpdate != ILevelUpdate.IDENTITY) {
+      if (levelUpdate != LevelUpdate.IDENTITY) {
         outputJson.add("level", levelUpdate.toJson());
       }
       json.add("output", outputJson);

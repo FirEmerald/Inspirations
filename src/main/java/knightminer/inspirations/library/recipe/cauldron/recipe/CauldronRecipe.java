@@ -9,8 +9,8 @@ import knightminer.inspirations.library.recipe.cauldron.contents.ICauldronConten
 import knightminer.inspirations.library.recipe.cauldron.ingredient.ICauldronIngredient;
 import knightminer.inspirations.library.recipe.cauldron.inventory.ICauldronInventory;
 import knightminer.inspirations.library.recipe.cauldron.inventory.IModifyableCauldronInventory;
-import knightminer.inspirations.library.recipe.cauldron.util.ILevelPredicate;
-import knightminer.inspirations.library.recipe.cauldron.util.ILevelUpdate;
+import knightminer.inspirations.library.recipe.cauldron.util.LevelPredicate;
+import knightminer.inspirations.library.recipe.cauldron.util.LevelUpdate;
 import knightminer.inspirations.library.recipe.cauldron.util.TemperaturePredicate;
 import knightminer.inspirations.recipes.InspirationsRecipes;
 import net.minecraft.item.ItemStack;
@@ -34,11 +34,11 @@ public class CauldronRecipe implements ICauldronRecipe {
   private final Ingredient input;
   private final int amount;
   private final ICauldronIngredient contents;
-  private final ILevelPredicate level;
+  private final LevelPredicate level;
   private final TemperaturePredicate temperature;
   private final ItemStack output;
   private final ICauldronContents newContents;
-  private final ILevelUpdate levelUpdate;
+  private final LevelUpdate levelUpdate;
   @Nullable
   private final ItemStack container;
 
@@ -56,8 +56,8 @@ public class CauldronRecipe implements ICauldronRecipe {
    * @param levelUpdate  Level updater
    * @param container    Container output. If null, fetches container from the item. If empty, no container
    */
-  public CauldronRecipe(ResourceLocation id, String group, Ingredient input, int amount, ICauldronIngredient contents, ILevelPredicate level,
-                        TemperaturePredicate temperature, ItemStack output, ICauldronContents newContents, ILevelUpdate levelUpdate, @Nullable ItemStack container) {
+  public CauldronRecipe(ResourceLocation id, String group, Ingredient input, int amount, ICauldronIngredient contents, LevelPredicate level,
+                        TemperaturePredicate temperature, ItemStack output, ICauldronContents newContents, LevelUpdate levelUpdate, @Nullable ItemStack container) {
     this.id = id;
     this.group = group;
     this.input = input;
@@ -165,7 +165,7 @@ public class CauldronRecipe implements ICauldronRecipe {
         amount = JSONUtils.getInt(json, "amount", 1);
       }
       ICauldronIngredient contents = CauldronIngredients.read(JSONUtils.getJsonObject(inputJson, "contents"));
-      ILevelPredicate levels = ILevelPredicate.read(JSONUtils.getJsonObject(inputJson, "level"));
+      LevelPredicate levels = LevelPredicate.read(JSONUtils.getJsonObject(inputJson, "level"));
       TemperaturePredicate temperature = getBoiling(inputJson, "temperature");
 
       // parse outputs
@@ -178,9 +178,9 @@ public class CauldronRecipe implements ICauldronRecipe {
       if (outputJson.has("contents")) {
         newContents = CauldronContentTypes.read(JSONUtils.getJsonObject(outputJson, "contents"));
       }
-      ILevelUpdate levelUpdate = ILevelUpdate.IDENTITY;
+      LevelUpdate levelUpdate = LevelUpdate.IDENTITY;
       if (outputJson.has("level")) {
-        levelUpdate = ILevelUpdate.read(JSONUtils.getJsonObject(outputJson, "level"));
+        levelUpdate = LevelUpdate.read(JSONUtils.getJsonObject(outputJson, "level"));
       }
       ItemStack container = null;
       if (outputJson.has("container")) {
@@ -224,11 +224,11 @@ public class CauldronRecipe implements ICauldronRecipe {
       Ingredient input = Ingredient.read(buffer);
       int amount = buffer.readVarInt();
       ICauldronIngredient contents = CauldronIngredients.read(buffer);
-      ILevelPredicate levels = ILevelPredicate.read(buffer);
+      LevelPredicate levels = LevelPredicate.read(buffer);
       TemperaturePredicate boiling = buffer.readEnumValue(TemperaturePredicate.class);
       ItemStack output = buffer.readItemStack();
       ICauldronContents newContents = CauldronContentTypes.read(buffer);
-      ILevelUpdate levelUpdate = ILevelUpdate.read(buffer);
+      LevelUpdate levelUpdate = LevelUpdate.read(buffer);
       ItemStack container = null;
       if (buffer.readBoolean()) {
         container = buffer.readItemStack();
