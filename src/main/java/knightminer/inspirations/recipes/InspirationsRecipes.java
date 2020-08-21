@@ -1,15 +1,9 @@
 package knightminer.inspirations.recipes;
 
-import knightminer.inspirations.Inspirations;
 import knightminer.inspirations.common.Config;
 import knightminer.inspirations.common.ModuleBase;
 import knightminer.inspirations.common.item.HidableItem;
 import knightminer.inspirations.library.recipe.cauldron.CauldronContentTypes;
-import knightminer.inspirations.library.recipe.cauldron.CauldronIngredients;
-import knightminer.inspirations.library.recipe.cauldron.ingredient.ContentMatchIngredient;
-import knightminer.inspirations.library.recipe.cauldron.ingredient.ContentTypeIngredient;
-import knightminer.inspirations.library.recipe.cauldron.ingredient.FluidCauldronIngredient;
-import knightminer.inspirations.library.recipe.cauldron.ingredient.ICauldronIngredientSerializer;
 import knightminer.inspirations.library.recipe.cauldron.recipe.CauldronRecipe;
 import knightminer.inspirations.recipes.block.EnhancedCauldronBlock;
 import knightminer.inspirations.recipes.block.SmashingAnvilBlock;
@@ -58,9 +52,6 @@ public class InspirationsRecipes extends ModuleBase {
 
   // cauldron serializers
   public static CauldronRecipe.Serializer cauldronSerializer;
-  public static ContentTypeIngredient.Serializer contentTypeIngredient;
-  public static ContentMatchIngredient.Serializer contentMatchIngredient;
-  public static FluidCauldronIngredient.Serializer fluidIngredient;
 
 
   @SubscribeEvent
@@ -106,11 +97,6 @@ public class InspirationsRecipes extends ModuleBase {
   void registerSerializers(Register<IRecipeSerializer<?>> event) {
     RegistryAdapter<IRecipeSerializer<?>> registry = new RegistryAdapter<>(event.getRegistry());
     cauldronSerializer = registry.register(new CauldronRecipe.Serializer(), "cauldron");
-
-    // cauldron ingredients
-    fluidIngredient = registerCauldronIngredient("fluid", new FluidCauldronIngredient.Serializer());
-    contentTypeIngredient = registerCauldronIngredient("type", new ContentTypeIngredient.Serializer());
-    contentMatchIngredient = registerCauldronIngredient("match", new ContentMatchIngredient.Serializer());
 
     // add water as an override to fluids and potions
     CauldronWater water = CauldronContentTypes.WATER.get();
@@ -160,18 +146,4 @@ public class InspirationsRecipes extends ModuleBase {
 			}
 		}
 	}*/
-
-  /* Utils */
-
-  /**
-   * Registers a cauldron ingredient to Inspirations name
-   * @param name        Ingredient name
-   * @param serializer  Serializer instance
-   * @param <T>         Class type
-   * @return  Registered serializer
-   */
-  private static <T extends ICauldronIngredientSerializer<?>> T registerCauldronIngredient(String name, T serializer) {
-    CauldronIngredients.register(Inspirations.getResource(name), serializer);
-    return serializer;
-  }
 }
