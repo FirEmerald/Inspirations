@@ -8,7 +8,8 @@ import slimeknights.mantle.recipe.inventory.ISingleItemInventory;
  */
 public interface ICauldronInventory extends ISingleItemInventory {
   /**
-   * Gets the contents of the cauldron
+   * Gets the contents of the cauldron.
+   * Should return {@link knightminer.inspirations.library.recipe.cauldron.contents.EmptyCauldronContents#INSTANCE} if {@link #getLevel()} returns 0. Should never return empty otherwise.
    * @return  Cauldron contents
    */
   ICauldronContents getContents();
