@@ -345,7 +345,7 @@ public class CauldronRecipeBuilder extends AbstractRecipeBuilder<CauldronRecipeB
       if (container != null) {
         if (container.isEmpty()) {
           JsonObject item = new JsonObject();
-          json.addProperty("empty", true);
+          item.addProperty("empty", true);
           outputJson.add("container", item);
         } else {
           outputJson.add("container", toJson(container));
