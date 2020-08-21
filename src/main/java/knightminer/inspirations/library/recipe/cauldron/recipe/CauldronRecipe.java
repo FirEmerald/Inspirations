@@ -163,7 +163,7 @@ public class CauldronRecipe implements ICauldronRecipe {
       Ingredient input = Ingredient.EMPTY;
       int amount = 0;
       if (inputJson.has("item")) {
-        input = CraftingHelper.getIngredient(json.get("item"));
+        input = CraftingHelper.getIngredient(inputJson.get("item"));
         amount = JSONUtils.getInt(json, "amount", 1);
       }
       ICauldronIngredient contents = CauldronIngredients.read(JSONUtils.getJsonObject(inputJson, "contents"));
