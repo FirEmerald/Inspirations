@@ -7,7 +7,6 @@ import com.google.gson.JsonSyntaxException;
 import io.netty.handler.codec.DecoderException;
 import knightminer.inspirations.library.recipe.cauldron.CauldronContentTypes;
 import knightminer.inspirations.library.recipe.cauldron.contents.ICauldronFluid;
-import knightminer.inspirations.library.recipe.cauldron.contenttype.MapContentType;
 import knightminer.inspirations.recipes.InspirationsRecipes;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
@@ -31,8 +30,8 @@ import java.util.function.Function;
  */
 public class FluidCauldronIngredient extends ContentMatchIngredient<ICauldronFluid,Fluid> {
   private final ITag<Fluid> tag;
-  private FluidCauldronIngredient(MapContentType<ICauldronFluid,Fluid> type, ITag<Fluid> tag) {
-    super(type);
+  private FluidCauldronIngredient(ITag<Fluid> tag) {
+    super(CauldronContentTypes.FLUID);
     this.tag = tag;
   }
 
@@ -60,7 +59,7 @@ public class FluidCauldronIngredient extends ContentMatchIngredient<ICauldronFlu
    * @return  Ingredient
    */
   public static FluidCauldronIngredient of(ITag<Fluid> tag) {
-    return new FluidCauldronIngredient(CauldronContentTypes.FLUID, tag);
+    return new FluidCauldronIngredient(tag);
   }
 
   @Override
