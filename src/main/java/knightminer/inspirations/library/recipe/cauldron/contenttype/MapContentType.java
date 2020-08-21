@@ -26,34 +26,22 @@ public abstract class MapContentType<C extends ICauldronContents, T> extends Cau
 
   /**
    * Creates a new instance with a specific key name
-   * @param clazz        Content type class for validation
    * @param constructor  Constructor to create contents from the type
    * @param valueGetter  Function to get the value from a content type
    * @param key          Key to use for serializing and deserializing
    */
-  protected MapContentType(Class<C> clazz, Function<? super T,? extends C> constructor, Function<C,T> valueGetter, String key) {
-    super(clazz);
+  protected MapContentType(Function<? super T,? extends C> constructor, Function<C,T> valueGetter, String key) {
+    super();
     this.constructor = constructor;
     this.valueGetter = valueGetter;
     this.key = key;
   }
 
-  @SuppressWarnings("WeakerAccess")
-  protected MapContentType(Class<C> clazz, Function<? super T,? extends C> constructor, Function<C,T> valueGetter) {
-    this(clazz, constructor, valueGetter, "name");
+  protected MapContentType(Function<? super T,? extends C> constructor, Function<C,T> valueGetter) {
+    this(constructor, valueGetter, "name");
   }
 
   /* Creation methods */
-
-  /**
-   * Adds an override to this type, preventing the default constructor
-   * @param value     Override to fetch
-   * @param instance  Instance to use for override
-   */
-  @SuppressWarnings("unused")
-  public void addOverride(T value, C instance) {
-    cache.put(getName(value), instance);
-  }
 
   /**
    * Gets a value of the given type

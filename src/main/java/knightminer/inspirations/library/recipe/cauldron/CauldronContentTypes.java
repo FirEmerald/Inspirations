@@ -46,23 +46,23 @@ public class CauldronContentTypes {
   /* Public constants */
 
   /** Generic water type */
-  public static final SingletonContentType<EmptyCauldronContents> EMPTY = register("empty", new SingletonContentType<>(EmptyCauldronContents.class, EmptyCauldronContents.INSTANCE));
+  public static final SingletonContentType<EmptyCauldronContents> EMPTY = register("empty", new SingletonContentType<>(EmptyCauldronContents.INSTANCE));
 
   /** Generic water type */
-  public static final SingletonContentType<CauldronWater> WATER = register("water", new SingletonContentType<>(CauldronWater.class, new CauldronWater()));
+  public static final SingletonContentType<CauldronWater> WATER = register("water", new SingletonContentType<>(new CauldronWater()));
 
   /** Contains an arbitrary color */
   public static final MapContentType<ICauldronColor, Integer> COLOR = register("color", new ColorContentType());
 
   /** Contains a specific color */
   @SuppressWarnings("ConstantConditions")
-  public static final MapContentType<ICauldronDye, DyeColor> DYE = register("dye", new NamedContentType<>(ICauldronDye.class, CauldronDye::new, name -> DyeColor.byTranslationKey(name, null), ICauldronDye::getDye));
+  public static final MapContentType<ICauldronDye, DyeColor> DYE = register("dye", new NamedContentType<>(CauldronDye::new, name -> DyeColor.byTranslationKey(name, null), ICauldronDye::getDye));
 
   /** Contains a specific color */
-  public static final MapContentType<ICauldronPotion, Potion> POTION = register("potion", new RegistryContentType<>(ICauldronPotion.class, CauldronPotion::new, ForgeRegistries.POTION_TYPES, ICauldronPotion::getPotion));
+  public static final MapContentType<ICauldronPotion, Potion> POTION = register("potion", new RegistryContentType<>(CauldronPotion::new, ForgeRegistries.POTION_TYPES, ICauldronPotion::getPotion));
 
   /** Contains a specific fluid */
-  public static final MapContentType<ICauldronFluid, Fluid> FLUID = register("fluid", new RegistryContentType<>(ICauldronFluid.class, CauldronFluid::new, ForgeRegistries.FLUIDS, ICauldronFluid::getFluid));
+  public static final MapContentType<ICauldronFluid, Fluid> FLUID = register("fluid", new RegistryContentType<>(CauldronFluid::new, ForgeRegistries.FLUIDS, ICauldronFluid::getFluid));
 
   /**
    * Registers a new content type
@@ -106,7 +106,7 @@ public class CauldronContentTypes {
    * @param <T>  Type class
    */
   private static <T extends ICauldronContents> void write(CauldronContentType<T> type, ICauldronContents contents, BiConsumer<CauldronContentType<T>, T> consumer) {
-    type.get(contents).ifPresent(cont -> consumer.accept(type, cont));
+    type.of(contents).ifPresent(cont -> consumer.accept(type, cont));
   }
 
   /**

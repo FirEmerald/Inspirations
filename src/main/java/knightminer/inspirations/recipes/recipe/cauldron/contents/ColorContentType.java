@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
  */
 public class ColorContentType extends MapContentType<ICauldronColor, Integer> {
   public ColorContentType() {
-    super(ICauldronColor.class, CauldronColor::new, ICauldronColor::getColor, "color");
+    super(CauldronColor::new, ICauldronColor::getColor, "color");
   }
 
   @Override

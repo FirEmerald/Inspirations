@@ -14,11 +14,9 @@ public class SingletonContentType<C extends ICauldronContents> extends CauldronC
 
   /**
    * Creates a new instance
-   * @param clazz     Content type class for validation
    * @param instance  Instance to always return
    */
-  public SingletonContentType(Class<C> clazz, C instance) {
-    super(clazz);
+  public SingletonContentType(C instance) {
     this.instance = instance;
   }
 

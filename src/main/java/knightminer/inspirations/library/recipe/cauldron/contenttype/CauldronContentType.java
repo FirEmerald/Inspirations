@@ -7,43 +7,53 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 
 import javax.annotation.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Represents a type of contents that can be stored in the cauldron
  * @param <C>  {@link ICauldronContents} implementation for this type
  */
 public abstract class CauldronContentType<C extends ICauldronContents> {
-  private final Class<C> clazz;
+  private final Map<ICauldronContents, Supplier<C>> equivalencies = new HashMap<>();
 
   /**
-   * Creates a new instance
-   * @param clazz  Content type class for validation
+   * Adds an equivalency to this type, allowing it to be used in place of the other, I.E. otherContents is thisContents, but not necessarily the other way around, I.E. thisContents may not be otherContents
+   * @param thisContents The contents of this type to match to
+   * @param otherContents The contents to be matched with
    */
-  protected CauldronContentType(Class<C> clazz) {
-    this.clazz = clazz;
+  public final void addEquivalency(Supplier<C> thisContents, ICauldronContents otherContents) {
+	  equivalencies.put(otherContents, thisContents);
   }
 
-  /**
-   * Checks if the given contents matches this type
-   * @param contents  Contents to check
-   * @return True if the type matches
-   */
-  public boolean matches(ICauldronContents contents) {
-    return clazz.isInstance(contents);
+  @SuppressWarnings("unchecked")
+  public final <T extends ICauldronContents >void addBiEquivalency(C thisContents, T otherContents) {
+	  addEquivalency(() -> thisContents, otherContents);
+	  ((CauldronContentType<T>) otherContents.getType()).addEquivalency(() -> otherContents, thisContents);
   }
 
   /**
    * Gets the contents as this type
    * @param contents  Contents to fetch
    * @return  Type to get
+   * @return Optional of the this type, empty if no equivalence is found
    */
-  public Optional<C> get(ICauldronContents contents) {
-    if (clazz.isInstance(contents)) {
-      return Optional.of(clazz.cast(contents));
-    }
-    return Optional.empty();
+  @SuppressWarnings("unchecked")
+  public Optional<C> of(ICauldronContents contents) {
+	  if (contents.is(this)) return Optional.of((C) contents);
+	  else {
+		  Supplier<C> supplier = equivalencies.get(contents);
+		  return supplier == null ? Optional.empty() : Optional.of(supplier.get());
+	  }
   }
+
+  /**
+   * Creates a new instance
+   */
+  protected CauldronContentType() {}
 
   /**
    * Reads the given type from NBT

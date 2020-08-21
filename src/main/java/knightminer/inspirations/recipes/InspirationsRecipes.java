@@ -11,6 +11,10 @@ import knightminer.inspirations.recipes.item.MixedDyedBottleItem;
 import knightminer.inspirations.recipes.item.SimpleDyedBottleItem;
 import knightminer.inspirations.recipes.recipe.cauldron.EmptyBucketCauldronRecipe;
 import knightminer.inspirations.recipes.recipe.cauldron.FillBucketCauldronRecipe;
+import knightminer.inspirations.recipes.recipe.cauldron.contents.CauldronColor;
+import knightminer.inspirations.recipes.recipe.cauldron.contents.CauldronDye;
+import knightminer.inspirations.recipes.recipe.cauldron.contents.CauldronFluid;
+import knightminer.inspirations.recipes.recipe.cauldron.contents.CauldronPotion;
 import knightminer.inspirations.recipes.recipe.cauldron.contents.CauldronWater;
 import net.minecraft.block.Block;
 import net.minecraft.block.FlowingFluidBlock;
@@ -35,6 +39,12 @@ import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import slimeknights.mantle.registration.FluidBuilder;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipeSerializer;
+import net.minecraft.potion.Potions;
+import net.minecraftforge.event.RegistryEvent.Register;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import slimeknights.mantle.registration.adapter.BlockRegistryAdapter;
 import slimeknights.mantle.registration.adapter.FluidRegistryAdapter;
 import slimeknights.mantle.registration.adapter.ItemRegistryAdapter;
@@ -152,24 +162,6 @@ public class InspirationsRecipes extends ModuleBase {
   }
 
   @SubscribeEvent
-  void registerSerializers(Register<IRecipeSerializer<?>> event) {
-    RegistryAdapter<IRecipeSerializer<?>> registry = new RegistryAdapter<>(event.getRegistry());
-    cauldronSerializer = registry.register(new CauldronRecipe.Serializer(), "cauldron");
-    emptyBucketSerializer = registry.register(new SpecialRecipeSerializer<>(EmptyBucketCauldronRecipe::new), "cauldron_empty_bucket");
-    fillBucketSerializer = registry.register(new SpecialRecipeSerializer<>(FillBucketCauldronRecipe::new), "cauldron_fill_bucket");
-
-    // add water as an override to fluids and potions
-    CauldronWater water = CauldronContentTypes.WATER.get();
-    CauldronContentTypes.FLUID.addOverride(Fluids.WATER, water);
-    CauldronContentTypes.POTION.addOverride(Potions.WATER, water);
-
-    // add all dyes as overrides into color
-    for (DyeColor color : DyeColor.values()) {
-      CauldronContentTypes.COLOR.addOverride(color.getColorValue(), CauldronContentTypes.DYE.of(color));
-    }
-  }
-
-  @SubscribeEvent
   void gatherData(GatherDataEvent event) {
     DataGenerator gen = event.getGenerator();
     if (event.includeServer()) {
@@ -183,6 +175,24 @@ public class InspirationsRecipes extends ModuleBase {
    */
   private static FluidAttributes.Builder coloredFluid() {
     return FluidAttributes.builder(STILL_FLUID, FLOWING_FLUID);
+  }
+
+  @SubscribeEvent
+  void registerSerializers(Register<IRecipeSerializer<?>> event) {
+    RegistryAdapter<IRecipeSerializer<?>> registry = new RegistryAdapter<>(event.getRegistry());
+    cauldronSerializer = registry.register(new CauldronRecipe.Serializer(), "cauldron");
+    emptyBucketSerializer = registry.register(new SpecialRecipeSerializer<>(EmptyBucketCauldronRecipe::new), "cauldron_empty_bucket");
+    fillBucketSerializer = registry.register(new SpecialRecipeSerializer<>(FillBucketCauldronRecipe::new), "cauldron_fill_bucket");
+
+    // add water as an override to fluids and potions
+    CauldronWater water = CauldronContentTypes.WATER.get();
+    CauldronContentTypes.FLUID.addEquivalency(() -> new CauldronFluid(Fluids.WATER), water);
+    CauldronContentTypes.POTION.addEquivalency(() -> new CauldronPotion(Potions.WATER), water);
+
+    // add all dyes as overrides into color
+    for (DyeColor color : DyeColor.values()) {
+    	CauldronContentTypes.COLOR.addBiEquivalency(new CauldronColor(color.colorValue), new CauldronDye(color));
+    }
   }
 
 	/* TODO: reimplement

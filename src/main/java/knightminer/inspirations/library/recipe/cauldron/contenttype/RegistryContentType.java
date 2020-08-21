@@ -21,13 +21,12 @@ public class RegistryContentType<C extends ICauldronContents, T extends IForgeRe
 
   /**
    * Creates a new instance
-   * @param clazz        Class for validation
    * @param constructor  Class constructor
    * @param registry     Forge registry instance for lookups
    * @param valueGetter  Function to get the value from a content type
    */
-  public RegistryContentType(Class<C> clazz, Function<? super T,? extends C> constructor, IForgeRegistry<T> registry, Function<C,T> valueGetter) {
-    super(clazz, constructor, valueGetter);
+  public RegistryContentType(Function<? super T,? extends C> constructor, IForgeRegistry<T> registry, Function<C,T> valueGetter) {
+    super(constructor, valueGetter);
     this.registry = registry;
   }
 

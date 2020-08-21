@@ -5,6 +5,8 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 /**
  * Base interface for all cauldron contents
  */
@@ -50,7 +52,7 @@ public interface ICauldronContents {
    * @return  True if it matches
    */
   default boolean is(CauldronContentType<?> type) {
-    return type.matches(this);
+    return type == getType();
   }
 
   /**
@@ -60,6 +62,6 @@ public interface ICauldronContents {
    * @return  Optional of the given type, empty if wrong type
    */
   default <C extends ICauldronContents> Optional<C> as(CauldronContentType<C> type) {
-    return type.get(this);
+    return type.of(this);
   }
 }

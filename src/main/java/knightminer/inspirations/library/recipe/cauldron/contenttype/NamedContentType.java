@@ -18,13 +18,12 @@ public class NamedContentType<C extends ICauldronContents, T extends IStringSeri
 
   /**
    * Creates a new type instance
-   * @param clazz        Contents class
    * @param constructor  Contents constructor
    * @param lookup       Function to lookup a value from a string
    * @param valueGetter  Function to get the value from a content type
    */
-  public NamedContentType(Class<C> clazz, Function<? super T,? extends C> constructor, Function<String,? extends T> lookup, Function<C,T> valueGetter) {
-    super(clazz, constructor, valueGetter);
+  public NamedContentType(Function<? super T,? extends C> constructor, Function<String,? extends T> lookup, Function<C,T> valueGetter) {
+    super(constructor, valueGetter);
     this.lookup = lookup;
   }
 
